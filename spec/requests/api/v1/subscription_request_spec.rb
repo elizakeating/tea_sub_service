@@ -50,7 +50,7 @@ RSpec.describe "Subscription Request" do
   it "sends message showing that customer has been sucessfully unsubscribed from a tea subscription" do
     SubscriptionCustomer.create(customer_id: @customer_1.id, subscription_id: @subscription.id)
 
-    delete "/api/v1/customers/#{@customer_1.id}/subscriptions/#{@subscription.id}"
+    patch "/api/v1/customers/#{@customer_1.id}/subscriptions/#{@subscription.id}"
 
     expect(response).to be_successful
 

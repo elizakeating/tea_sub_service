@@ -9,7 +9,7 @@ class Api::V1::SubscriptionCustomersController < ApplicationController
     end
   end
 
-  def destroy
+  def update
     change_status = Subscription.find(params[:subscription_id]).update_column(:status, 0)
     
     subscribed = SubscriptionCustomer.find_by(subscription_id: params[:subscription_id], customer_id: params[:customer_id])
