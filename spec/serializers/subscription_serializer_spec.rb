@@ -17,7 +17,6 @@ RSpec.describe SubscriptionSerializer do
         attributes: {
           title: subscription.title,
           price: subscription.price,
-          status: subscription.status,
           frequency: subscription.frequency
         }
       }
