@@ -23,11 +23,37 @@ RSpec.describe "Subscription Request" do
       brew_time: "4 minutes"
     )
 
+    @tea_3 = Tea.create(
+      title: "Blueberry",
+      description: "Blueberry goodness",
+      temperature: "100 F",
+      brew_time: "6 minutes"
+    )
+
+    @tea_4 = Tea.create(
+      title: "Raspberry",
+      description: "Raspberry goodness",
+      temperature: "105 F",
+      brew_time: "3 minutes"
+    )
+
     @subscription = Subscription.create(
       title: "Minty Delight",
       price: 25.00,
       frequency: "2 weeks"
     )
+
+    @subscription_2 = Subscription.create(
+      title: "Fruity Fun",
+      price: 45.00,
+      frequency: "1 month"
+    )
+
+    TeaSubscription.create(subscription_id: @subscription.id, tea_id: @tea_1.id)
+    TeaSubscription.create(subscription_id: @subscription.id, tea_id: @tea_2.id)
+
+    TeaSubscription.create(subscription_id: @subscription_2.id, tea_id: @tea_3.id)
+    TeaSubscription.create(subscription_id: @subscription_2.id, tea_id: @tea_4.id)
   end
 
   it "sends message showing that a customer has subscribed successfully to a tea subscription" do
@@ -48,7 +74,7 @@ RSpec.describe "Subscription Request" do
   end
 
   it "sends message showing that customer has been sucessfully unsubscribed from a tea subscription" do
-    SubscriptionCustomer.create(customer_id: @customer_1.id, subscription_id: @subscription.id)
+    post "/api/v1/customers/#{@customer_1.id}/subscriptions/#{@subscription.id}"
 
     patch "/api/v1/customers/#{@customer_1.id}/subscriptions/#{@subscription.id}"
 
@@ -64,5 +90,43 @@ RSpec.describe "Subscription Request" do
     expect(@customer_1.subscriptions.first.price).to eq(25.0)
     expect(@customer_1.subscriptions.first.status).to eq("cancelled")
     expect(@customer_1.subscriptions.first.frequency).to eq("2 weeks")
+  end
+
+  it "should return all of a customer's subscriptions, both active and cancelled" do
+    post "/api/v1/customers/#{@customer_1.id}/subscriptions/#{@subscription.id}"
+    post "/api/v1/customers/#{@customer_1.id}/subscriptions/#{@subscription_2.id}"
+
+    get "/api/v1/customers/#{@customer_1.id}/subscriptions"
+
+    expect(response).to be_successful
+
+    json = JSON.parse(response.body, symbolize_names: true)
+
+    expect(json).to have_key(:data)
+    expect(json[:data]).to be_an(Array)
+    expect(json[:data].count).to eq(2)
+
+    json[:data].each do |subscription|
+      expect(subscription).to have_key(:id)
+      expect(subscription[:id]).to be_a(String)
+
+      expect(subscription).to have_key(:type)
+      expect(subscription[:type]).to eq("subscription")
+
+      expect(subscription).to have_key(:attributes)
+      expect(subscription[:attributes]).to be_a(Hash)
+
+      expect(subscription[:attributes]).to have_key(:title)
+      expect(subscription[:attributes][:title]).to be_a(String)
+
+      expect(subscription[:attributes]).to have_key(:price)
+      expect(subscription[:attributes][:price]).to be_a(Float)
+
+      expect(subscription[:attributes]).to have_key(:status)
+      expect(subscription[:attributes][:status]).to be_a(String)
+
+      expect(subscription[:attributes]).to have_key(:frequency)
+      expect(subscription[:attributes][:frequency]).to be_a(String)
+    end
   end
 end
