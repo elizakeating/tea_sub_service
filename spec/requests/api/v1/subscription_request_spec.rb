@@ -69,8 +69,8 @@ RSpec.describe "Subscription Request" do
     expect(@customer_1.subscriptions.first).to be_a(Subscription)
     expect(@customer_1.subscriptions.first.title).to eq("Minty Delight")
     expect(@customer_1.subscriptions.first.price).to eq(25.0)
-    expect(@customer_1.subscriptions.first.status).to eq("active")
     expect(@customer_1.subscriptions.first.frequency).to eq("2 weeks")
+    expect(@customer_1.subscription_customers.first.status).to eq("active")
   end
 
   it "sends message showing that customer has been sucessfully unsubscribed from a tea subscription" do
@@ -88,8 +88,8 @@ RSpec.describe "Subscription Request" do
     expect(@customer_1.subscriptions.first).to be_a(Subscription)
     expect(@customer_1.subscriptions.first.title).to eq("Minty Delight")
     expect(@customer_1.subscriptions.first.price).to eq(25.0)
-    expect(@customer_1.subscriptions.first.status).to eq("cancelled")
     expect(@customer_1.subscriptions.first.frequency).to eq("2 weeks")
+    expect(@customer_1.subscription_customers.first.status).to eq("cancelled")
   end
 
   it "should return all of a customer's subscriptions, both active and cancelled" do
@@ -121,9 +121,6 @@ RSpec.describe "Subscription Request" do
 
       expect(subscription[:attributes]).to have_key(:price)
       expect(subscription[:attributes][:price]).to be_a(Float)
-
-      expect(subscription[:attributes]).to have_key(:status)
-      expect(subscription[:attributes][:status]).to be_a(String)
 
       expect(subscription[:attributes]).to have_key(:frequency)
       expect(subscription[:attributes][:frequency]).to be_a(String)
