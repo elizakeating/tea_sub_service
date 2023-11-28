@@ -126,4 +126,34 @@ RSpec.describe "Subscription Request" do
       expect(subscription[:attributes][:frequency]).to be_a(String)
     end
   end
+
+  it "should return message if customer not found when looking for subscription" do
+    get "/api/v1/customers/45/subscriptions"
+
+    error = JSON.parse(response.body, symbolize_names: true)
+
+    expect(error).to eq({
+      error: "Couldn't find Customer with 'id'=45"
+    })
+  end
+
+  it "sould return error message if customer was not successfully unsubscribed" do
+    patch "/api/v1/customers/56/subscriptions/#{@subscription.id}"
+
+    error = JSON.parse(response.body, symbolize_names: true)
+
+    expect(error).to eq({
+      error: "Customer was not able to be unsubscribed. Please make sure the customer or subscription id is correct."
+    })
+  end
+
+  it "should return error if customr was not able to be subscribed" do
+    post "/api/v1/customers/#{@customer_1.id}/subscriptions/45"
+
+    error = JSON.parse(response.body, symbolize_names: true)
+
+    expect(error).to eq({
+      error: "Customer was not able to be subscribed. Please make sure the customer or subscription id is correct."
+    })
+  end
 end
